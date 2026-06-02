@@ -28,39 +28,6 @@
                     "rebase"
                 ]
             }
-        },
-        {
-            "type": "required_status_checks",
-            "parameters": {
-                "strict_required_status_checks_policy": false,
-                "do_not_enforce_on_create": false,
-                "required_status_checks": [
-                    {
-                        "context": "Analyze (java)",
-                        "integration_id": 15368
-                    },
-                    {
-                        "context": "pmd-analysis",
-                        "integration_id": 15368
-                    },
-                    {
-                        "context": "Test - Java 25",
-                        "integration_id": 15368
-                    },
-                    {
-                        "context": "json-lint",
-                        "integration_id": 15368
-                    },
-                    {
-                        "context": "json-validate",
-                        "integration_id": 15368
-                    },
-                    {
-                        "context": "spectral-lint",
-                        "integration_id": 15368
-                    }
-                ]
-            }
         }
     ],
     "bypass_actors": []
