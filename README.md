@@ -9,8 +9,37 @@ Swagger UI documentation and source repository.
 This is the central-index half of the GitHub Pages stop-gap described in
 [Migrating from API Hub](https://tools.hmcts.net/confluence/spaces/AMP/pages/1973306073/Migrating+from+API+Hub).
 Each API hosts its **own** documentation site at `https://hmcts.github.io/<repo>/`;
-this repo just lists them. See [docs/CATALOG-PLAN.md](docs/CATALOG-PLAN.md) for
-the design and rationale.
+this repo just lists them.
+
+It is explicitly a **bridge, not the destination**. When the
+[APIM Developer Portal](https://tools.hmcts.net/confluence/spaces/AMP/pages/1973304611/Publishing+existing+API+spec+to+Developer+Portal)
+lands, the catalog index is re-pointed at portal URLs and the per-repo Pages
+sites are retired.
+
+## How it works
+
+```
+  api-cp-crime-echo ─┐                                          (each repo adds ONE
+  api-cp-...-hrds   ─┤ uses: hmcts/amp-catalog/                  caller workflow)
+  api-cp-...        ─┘   .github/workflows/publish-swagger-ui.yml@v1
+        │                          │
+        │ reusable workflow runs   ▼
+        │ in the caller's context, deploys to
+        └────────────────────► hmcts.github.io/<repo>/          (its own Swagger UI)
+                                       ▲
+   daily discover-apis.yml ───────────┘ scans org, reads each live spec
+        │ opens PR updating apis.json
+        ▼
+  amp-catalog ─────────────────► hmcts.github.io/amp-catalog/   (this index)
+```
+
+- Each API repo publishes its **own** documentation site (default
+  `GITHUB_TOKEN`, no cross-repo secrets) — but the publish *logic* lives once in
+  this repo's reusable workflow, so a repo's whole footprint is one ~12-line
+  caller.
+- `amp-catalog` holds the reusable publish workflow, a registry
+  (`docs/apis.json`), the discovery job that keeps it current, and a static
+  landing page that renders it.
 
 ---
 
@@ -89,3 +118,78 @@ in the catalog. You don't have to register anything by hand.
 > required fields, no duplicate names). Manual entries use the same fields:
 > `name` (repo name — required), `title`, `description`, `team`, and optional
 > `docs` / `repo` URL overrides.
+
+### Sequence
+
+```mermaid
+sequenceDiagram
+    actor Dev as API team
+    participant Repo as API repo
+    participant WF as Reusable workflow (amp-catalog)
+    participant Site as API docs site
+    participant Disc as discover-apis.yml (daily)
+    participant Index as Catalog site
+
+    Note over Dev,Site: Publish — one caller workflow, run on release
+    Dev->>Repo: Add publish-api-docs.yml (uses: …/publish-swagger-ui.yml@v1)
+    Dev->>Repo: Cut a release (or workflow_dispatch)
+    Repo->>WF: Call reusable workflow with openapi_path
+    WF->>Site: Enable Pages, generate viewer + spec, deploy
+    Site-->>Dev: Live docs at hmcts.github.io/REPO/
+
+    Note over Disc,Index: List — automatic, no manual registration
+    Disc->>Repo: Org scan finds repos using the workflow
+    Disc->>Site: Read live spec info.title / info.description
+    Disc->>Index: Open PR updating docs/apis.json
+    Dev->>Index: Merge PR (or it's auto-merged)
+    Note over Index: Landing page reads apis.json on load
+    Index-->>Dev: API now listed, linking to its docs site
+```
+
+## Registry schema
+
+`docs/apis.json`:
+
+```json
+{
+  "apis": [
+    {
+      "name": "api-cp-crime-echo",      // required — GitHub repo name
+      "title": "Crime Echo API",        // required — display name
+      "description": "One-liner.",       // required — shown in the list
+      "team": "Case Admin",              // required — owning team
+      "docs": "https://…",               // optional — overrides derived docs URL
+      "repo": "https://…"                // optional — overrides derived repo URL
+    }
+  ]
+}
+```
+
+Derived when not overridden:
+- docs → `https://hmcts.github.io/<name>/`
+- repo → `https://github.com/hmcts/<name>`
+
+## Scope
+
+**In scope:** external (bucket 2c) and external-with-mock (2b, docs-only here)
+APIs — anything safe to expose publicly, since GitHub Pages on a public repo is
+world-readable.
+
+**Out of scope:** internal-only APIs (bucket 2a). GitHub Pages cannot enforce
+signed-in-only access without GitHub Enterprise, so internal APIs stay on API
+Hub until the Developer Portal lands.
+
+## Operational notes
+
+- **Discovery token:** `discover-apis.yml` needs a repo secret
+  `CATALOG_DISCOVERY_TOKEN` with org repo-read + code-search access — the
+  default `GITHUB_TOKEN` cannot search across other repos. Without it the daily
+  job fails; manual `docs/apis.json` edits still work.
+- **Team derivation** is best-effort (first `@org/team` in the discovered repo's
+  `CODEOWNERS`, else `TBD`). Override by editing the entry directly.
+
+## Future enhancements (not built)
+
+- **Version awareness:** surface the latest published version per API.
+- **Retirement path:** swap derived docs URLs for Developer Portal URLs in one
+  place once the portal is live.
