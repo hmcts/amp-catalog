@@ -3,27 +3,114 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>API Documentation</title>
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.18.2/swagger-ui.css"
-    />
+    <title>HMCTS API Catalog</title>
+    <style>
+      :root { --ink: #0b0c0c; --muted: #505a5f; --line: #b1b4b6; --link: #1d70b8; }
+      * { box-sizing: border-box; }
+      body {
+        font-family: "GDS Transport", arial, sans-serif;
+        color: var(--ink); margin: 0; line-height: 1.5;
+      }
+      header { background: #0b0c0c; color: #fff; padding: 1rem 1.5rem; }
+      header h1 { margin: 0; font-size: 1.5rem; }
+      header p { margin: 0.25rem 0 0; color: #b1b4b6; font-size: 0.9rem; }
+      main { max-width: 960px; margin: 0 auto; padding: 1.5rem; }
+      .search {
+        width: 100%; padding: 0.6rem 0.75rem; font-size: 1rem;
+        border: 2px solid var(--ink); margin-bottom: 1.5rem;
+      }
+      .api {
+        border-bottom: 1px solid var(--line); padding: 1rem 0;
+      }
+      .api h2 { margin: 0 0 0.25rem; font-size: 1.2rem; }
+      .api .name { color: var(--muted); font-family: monospace; font-size: 0.85rem; }
+      .api p { margin: 0.4rem 0; }
+      .api .team {
+        display: inline-block; background: #f3f2f1; color: var(--muted);
+        padding: 0.1rem 0.5rem; font-size: 0.8rem; border-radius: 3px;
+      }
+      .api .links { margin-top: 0.5rem; }
+      .api a { color: var(--link); margin-right: 1.25rem; text-decoration: none; }
+      .api a:hover { text-decoration: underline; }
+      .empty, .error { color: var(--muted); padding: 1rem 0; }
+      .error { color: #d4351c; }
+    </style>
   </head>
   <body>
-    <div id="swagger-ui"></div>
-    <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.18.2/swagger-ui-bundle.js"></script>
+    <header>
+      <h1>HMCTS API Catalog</h1>
+      <p>Published API documentation across the HMCTS organisation</p>
+    </header>
+    <main>
+      <input
+        id="search"
+        class="search"
+        type="search"
+        placeholder="Filter APIs by name, title, description or team…"
+        aria-label="Filter APIs"
+      />
+      <div id="list"><p class="empty">Loading…</p></div>
+    </main>
+
     <script>
-      window.onload = () => {
-        window.ui = SwaggerUIBundle({
-          url: "openapi-spec.yml",
-          dom_id: "#swagger-ui",
-          deepLinking: true,
-          // Stop-gap: docs-only. Try-It is disabled so no request ever reaches a
-          // backend; OpenAPI `examples:` still render in the Example Value tab.
-          tryItOutEnabled: false,
-          supportedSubmitMethods: [],
+      const ORG = "hmcts";
+      const repoUrl = (a) => a.repo || `https://github.com/${ORG}/${a.name}`;
+      const docsUrl = (a) => a.docs || `https://${ORG}.github.io/${a.name}/`;
+
+      const escape = (s) =>
+        String(s ?? "").replace(/[&<>"]/g, (c) =>
+          ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])
+        );
+
+      let apis = [];
+
+      function render(filter = "") {
+        const list = document.getElementById("list");
+        const f = filter.trim().toLowerCase();
+        const matches = apis.filter((a) =>
+          [a.name, a.title, a.description, a.team]
+            .join(" ")
+            .toLowerCase()
+            .includes(f)
+        );
+        if (!matches.length) {
+          list.innerHTML = `<p class="empty">No APIs match "${escape(filter)}".</p>`;
+          return;
+        }
+        list.innerHTML = matches
+          .sort((a, b) => (a.title || a.name).localeCompare(b.title || b.name))
+          .map(
+            (a) => `
+            <div class="api">
+              <h2>${escape(a.title || a.name)}</h2>
+              <div class="name">${escape(a.name)}</div>
+              <p>${escape(a.description || "")}</p>
+              ${a.team ? `<span class="team">${escape(a.team)}</span>` : ""}
+              <div class="links">
+                <a href="${escape(docsUrl(a))}">API documentation →</a>
+                <a href="${escape(repoUrl(a))}">Source repository →</a>
+              </div>
+            </div>`
+          )
+          .join("");
+      }
+
+      fetch("apis.json")
+        .then((r) => {
+          if (!r.ok) throw new Error(`HTTP ${r.status}`);
+          return r.json();
+        })
+        .then((data) => {
+          apis = Array.isArray(data.apis) ? data.apis : [];
+          render();
+          document
+            .getElementById("search")
+            .addEventListener("input", (e) => render(e.target.value));
+        })
+        .catch((err) => {
+          document.getElementById("list").innerHTML =
+            `<p class="error">Could not load the API registry: ${escape(err.message)}</p>`;
         });
-      };
     </script>
   </body>
 </html>
