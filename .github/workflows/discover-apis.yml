@@ -1,0 +1,58 @@
+name: Discover APIs for catalog
+
+# Scheduled reconciliation of docs/apis.json. Scans the org for repos that
+# publish via the reusable Swagger UI workflow, reads each live spec's
+# title/description, and opens a PR if the registry has drifted.
+#
+# Requires a repo secret CATALOG_DISCOVERY_TOKEN: a token with org repo read
+# and code-search access (the default GITHUB_TOKEN cannot search across repos).
+on:
+  schedule:
+    - cron: "0 6 * * *" # daily at 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install pyyaml
+
+      - name: Reconcile docs/apis.json
+        env:
+          GH_TOKEN: ${{ secrets.CATALOG_DISCOVERY_TOKEN }}
+          ORG: ${{ github.repository_owner }}
+        run: python scripts/discover_apis.py
+
+      - name: Open PR if the registry changed
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if git diff --quiet docs/apis.json; then
+            echo "No catalog changes."
+            exit 0
+          fi
+          branch=chore/catalog-autodiscovery
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -B "$branch"
+          git add docs/apis.json
+          git commit -m "chore: reconcile API catalog from discovery"
+          git push -f -u origin "$branch"
+          if [ -z "$(gh pr list --head "$branch" --state open --json number -q '.[0].number')" ]; then
+            gh pr create --base main --head "$branch" \
+              --title "chore: reconcile API catalog from discovery" \
+              --body "Automated update of \`docs/apis.json\` from the daily org scan."
+          fi

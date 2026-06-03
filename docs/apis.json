@@ -1,0 +1,16 @@
+{
+  "apis": [
+    {
+      "name": "api-cp-crime-hearing-results-document-subscription",
+      "title": "Crime Hearing Results Document Subscription",
+      "description": "Subscription API for crime hearing-results documents.",
+      "team": "APM"
+    },
+    {
+      "name": "api-cp-crime-echo",
+      "title": "Echo API",
+      "description": "Simple example API for the API Marketplace.",
+      "team": "Case Admin"
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+name: Validate API catalog
+
+on:
+  pull_request:
+    paths:
+      - docs/apis.json
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Validate docs/apis.json
+        run: |
+          file=docs/apis.json
+
+          # Must be valid JSON.
+          if ! jq empty "$file" 2>/dev/null; then
+            echo "::error::$file is not valid JSON"
+            exit 1
+          fi
+
+          # Top-level "apis" must be an array.
+          if [ "$(jq -r 'has("apis") and (.apis | type == "array")' "$file")" != "true" ]; then
+            echo "::error::$file must contain an \"apis\" array"
+            exit 1
+          fi
+
+          # Each entry needs name, title, description, team (all non-empty).
+          count=$(jq '.apis | length' "$file")
+          fail=0
+          for i in $(seq 0 $((count - 1))); do
+            for field in name title description team; do
+              val=$(jq -r ".apis[$i].$field // \"\"" "$file")
+              if [ -z "$val" ]; then
+                echo "::error::apis[$i] is missing required field: $field"
+                fail=1
+              fi
+            done
+          done
+
+          # Names must be unique.
+          dupes=$(jq -r '.apis | group_by(.name) | map(select(length > 1) | .[0].name) | .[]' "$file")
+          if [ -n "$dupes" ]; then
+            echo "::error::Duplicate API name(s): $dupes"
+            fail=1
+          fi
+
+          if [ "$fail" -ne 0 ]; then
+            exit 1
+          fi
+          echo "✅ $file is valid ($count API(s) listed)."
