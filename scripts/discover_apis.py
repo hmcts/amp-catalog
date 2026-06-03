@@ -52,6 +52,7 @@ def find_repos():
         print(f"::error::code search failed: {e}", file=sys.stderr)
         raise
     repos = {item["repository"]["name"] for item in data.get("items", [])}
+    repos.discard("amp-catalog")  # the catalog repo references the workflow in its own docs/skill
     return sorted(repos)
 
 
@@ -88,31 +89,48 @@ def fetch_team(repo):
     return "TBD"
 
 
+def load_existing(path):
+    """Existing registry keyed by name, or {} if absent/unreadable."""
+    try:
+        with open(path) as fh:
+            data = json.load(fh)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
+    return {a["name"]: a for a in data.get("apis", []) if a.get("name")}
+
+
 def main():
     repos = find_repos()
     print(f"Discovered {len(repos)} repo(s) referencing the workflow.")
-    apis = []
+
+    # Additive by design: add newly-published APIs, never overwrite or remove
+    # existing entries. This keeps curated edits and survives a transient Pages
+    # fetch failure (which would otherwise drop a live API). Removals are manual.
+    apis = load_existing(OUTPUT)
+    added = 0
     for repo in repos:
+        if repo in apis:
+            print(f"  keep {repo}: already listed")
+            continue
         info = fetch_spec_info(repo)
         if info is None:
-            print(f"  skip {repo}: no live spec at Pages site")
+            print(f"  skip {repo}: no live spec at Pages site yet")
             continue
         title, description = info
-        apis.append(
-            {
-                "name": repo,
-                "title": title,
-                "description": description,
-                "team": fetch_team(repo),
-            }
-        )
-        print(f"  list {repo}: {title}")
+        apis[repo] = {
+            "name": repo,
+            "title": title,
+            "description": description,
+            "team": fetch_team(repo),
+        }
+        added += 1
+        print(f"  add  {repo}: {title}")
 
-    apis.sort(key=lambda a: a["name"])
+    ordered = sorted(apis.values(), key=lambda a: a["name"])
     with open(OUTPUT, "w") as fh:
-        json.dump({"apis": apis}, fh, indent=2)
+        json.dump({"apis": ordered}, fh, indent=2)
         fh.write("\n")
-    print(f"Wrote {len(apis)} API(s) to {OUTPUT}")
+    print(f"Wrote {len(ordered)} API(s) to {OUTPUT} ({added} added).")
 
 
 if __name__ == "__main__":

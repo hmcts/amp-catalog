@@ -187,6 +187,10 @@ Hub until the Developer Portal lands.
   job fails; manual `docs/apis.json` edits still work.
 - **Team derivation** is best-effort (first `@org/team` in the discovered repo's
   `CODEOWNERS`, else `TBD`). Override by editing the entry directly.
+- **Discovery is additive:** it adds newly-published APIs (those with a live
+  Pages site) and never overwrites or removes existing entries — so curated
+  edits stick and a transient fetch failure can't drop a live API. Remove an API
+  by editing `docs/apis.json` by hand.
 
 ## Future enhancements (not built)
 
