@@ -192,6 +192,22 @@ Hub until the Developer Portal lands.
   edits stick and a transient fetch failure can't drop a live API. Remove an API
   by editing `docs/apis.json` by hand.
 
+## Troubleshooting
+
+**Release publishes nothing / the docs site 404s, and the publish run failed in
+a few seconds with no step logs.** The auto-created `github-pages` environment
+only allows deployments from `main` by default, but a `release` runs from the
+**tag** ref — so the deploy is rejected at the environment gate. Add a tag
+deployment policy to the repo once (requires repo admin):
+
+```bash
+gh api -X POST "repos/hmcts/<repo>/environments/github-pages/deployment-branch-policies" \
+  -f name='*' -f type='tag'
+```
+
+Then re-run the failed publish (`gh run rerun <run-id>`) or cut a new release.
+(The `publish-api-to-catalog` skill does this step for you.)
+
 ## Future enhancements (not built)
 
 - **Version awareness:** surface the latest published version per API.

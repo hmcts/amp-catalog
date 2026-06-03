@@ -125,13 +125,23 @@ After the PR is merged (ask the user to merge, or merge if they direct you):
    gh run list --workflow publish-api-docs.yml --limit 1
    gh run watch <RUN_ID>
    ```
-3. Confirm the live site (expect HTTP 200):
+3. **Allow release (tag) deploys.** The auto-created `github-pages` environment
+   permits deployments only from `main` by default. A `release`-triggered run
+   uses the **tag** ref, so it is rejected at the environment gate — the deploy
+   job fails instantly with no logs and the site stays 404. Add a tag policy
+   once (after the first run has created the environment; requires repo admin):
+   ```bash
+   repo=$(gh repo view --json name -q .name)
+   gh api -X POST "repos/hmcts/$repo/environments/github-pages/deployment-branch-policies" \
+     -f name='*' -f type='tag'
+   ```
+4. Confirm the live site (expect HTTP 200):
    ```bash
    repo=$(gh repo view --json name -q .name)
    curl -sS -o /dev/null -w "%{http_code}\n" "https://hmcts.github.io/$repo/"
    curl -sS -o /dev/null -w "%{http_code}\n" "https://hmcts.github.io/$repo/openapi-spec.yml"
    ```
-4. **Catalog listing** is automatic — the daily `discover-apis.yml` job in
+5. **Catalog listing** is automatic — the daily `discover-apis.yml` job in
    amp-catalog picks the repo up and opens a PR adding it to `docs/apis.json`.
    Tell the user it will appear within ~24h.
 
