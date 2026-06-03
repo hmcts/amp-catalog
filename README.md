@@ -202,7 +202,7 @@ deployment policy to the repo once (requires repo admin):
 
 ```bash
 gh api -X POST "repos/hmcts/<repo>/environments/github-pages/deployment-branch-policies" \
-  -f name='*' -f type='tag'
+  -f name='v*' -f type='tag'
 ```
 
 Then re-run the failed publish (`gh run rerun <run-id>`) or cut a new release.

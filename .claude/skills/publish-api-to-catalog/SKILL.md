@@ -133,7 +133,7 @@ After the PR is merged (ask the user to merge, or merge if they direct you):
    ```bash
    repo=$(gh repo view --json name -q .name)
    gh api -X POST "repos/hmcts/$repo/environments/github-pages/deployment-branch-policies" \
-     -f name='*' -f type='tag'
+     -f name='v*' -f type='tag'
    ```
 4. Confirm the live site (expect HTTP 200):
    ```bash
