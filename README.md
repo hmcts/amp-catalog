@@ -53,22 +53,26 @@ If you use Claude Code, the `publish-api-to-catalog` skill does the whole thing
 for you: it finds your spec, runs a public-exposure eligibility check, adds the
 caller workflow, opens the PR, and verifies the live site and catalog listing.
 
-1. **Install the skill once** (makes it available in any repo):
+1. **Install the skill once** (makes it available in any repo). Symlink it from a
+   checkout so `git pull` keeps the skill current — no stale copies:
    ```bash
+   git clone https://github.com/hmcts/amp-catalog.git   # or reuse an existing checkout
    mkdir -p ~/.claude/skills
-   # from a checkout of this repo:
-   cp -r amp-catalog/.claude/skills/publish-api-to-catalog ~/.claude/skills/
-   # or copy it straight from GitHub:
-   #   gh repo clone hmcts/amp-catalog -- --depth 1 \
-   #     && cp -r amp-catalog/.claude/skills/publish-api-to-catalog ~/.claude/skills/
+   ln -s "$(pwd)/amp-catalog/.claude/skills/publish-api-to-catalog" \
+     ~/.claude/skills/publish-api-to-catalog
    ```
+   > Prefer a self-contained copy (no dependency on the checkout path)? Use
+   > `cp -r amp-catalog/.claude/skills/publish-api-to-catalog ~/.claude/skills/`
+   > instead — but you'll need to re-copy to pick up updates.
 2. **Run Claude Code from inside your API repo** and invoke it:
    ```
    /publish-api-to-catalog
    ```
    or just ask: *"publish this API to the catalog"*.
 3. Answer the eligibility prompt (the skill will not publish an internal-only
-   API), then let it open the PR and verify the result.
+   API), then let it open the PR(s) and verify. It opens the API-repo PR and,
+   if you want immediate listing, a second PR in `amp-catalog` — see
+   **Result — two PRs** below for what gets opened and the merge order.
 
 > The skill is the optional fast path. The manual steps below are the source of
 > truth and work without Claude Code.
@@ -118,6 +122,21 @@ in the catalog. You don't have to register anything by hand.
 > required fields, no duplicate names). Manual entries use the same fields:
 > `name` (repo name — required), `title`, `description`, `team`, and optional
 > `docs` / `repo` URL overrides.
+
+### Result — two PRs, API repo first
+
+Whether you use the skill or the manual steps, publishing an API **and** listing
+it immediately produces **two pull requests**:
+
+1. **In your API repo** — adds `publish-api-docs.yml`.
+2. **In `amp-catalog`** — adds the `docs/apis.json` entry. Only needed for
+   immediate listing; otherwise the daily discovery job opens this PR for you.
+
+Both must be reviewed, approved, and merged — and **the API-repo PR goes first**.
+Merge it and let a release (or `workflow_dispatch`) publish the docs site, so the
+catalog entry links to a site that is already live. The catalog also only
+auto-discovers repos whose site is already up, so the API side must lead either
+way.
 
 ### Sequence
 
