@@ -17,6 +17,12 @@
       "title": "Crime Prosecution Case Details",
       "description": "API for retrieving crime prosecution case details by URN.",
       "team": "APM"
+    },
+    {
+      "name": "api-cp-crime-caseingestion-prosecutor",
+      "title": "API Common Platform Prosecutor Interface",
+      "description": "Crime API providing information on Common Platform Prosecutor Interface (CPPI).",
+      "team": "CIMD"
     }
   ]
 }
