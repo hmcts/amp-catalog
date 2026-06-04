@@ -17,6 +17,12 @@
       "title": "Crime Prosecution Case Details",
       "description": "API for retrieving crime prosecution case details by URN.",
       "team": "APM"
+    },
+    {
+      "name": "cpp-case-aggregator-poc",
+      "title": "CPP Case Aggregator API",
+      "description": "Aggregates data from CPP downstream services and exposes shaped responses per domain.",
+      "team": "APM"
     }
   ]
 }
