@@ -52,10 +52,17 @@ Run these phases in order. Do not skip Phase 2.
    pattern), fix it as part of this onboarding — include it in the Phase 4 PR
    or open a separate `chore:` PR.
 
-   At release time the shared `hmcts/update-openapi-version` action re-stamps
-   `info.version` AND `servers[0]` with this same pattern, setting the version
-   to the GitHub release version — so the in-repo default is only a
-   placeholder; do not hand-bump it.
+   The in-repo version is only a placeholder — do not hand-bump it. The real
+   version is the GitHub release tag (without the `v` prefix), stamped in two
+   places:
+   - **Release artefacts**: `hmcts/update-openapi-version` (in
+     `ci-released.yml`) re-stamps `info.version` and `servers[0]` with this
+     same pattern.
+   - **Docs site**: the shared `publish-swagger-ui.yml` workflow stamps the
+     spec before deploying (release tag on release runs; latest `v*` tag via
+     `git describe` on manual dispatch), so the published Swagger UI always
+     shows the released version. Repos with no `v*` tag yet publish the
+     committed placeholder until their first release.
 4. Record the path relative to the repo root as `OPENAPI_PATH`.
 
 ## Phase 2 — Eligibility check (REQUIRED — do not skip)
@@ -171,11 +178,15 @@ After the PR is merged (ask the user to merge, or merge if they direct you):
    gh api -X POST "repos/hmcts/$repo/environments/github-pages/deployment-branch-policies" \
      -f name='v*' -f type='tag'
    ```
-5. Confirm the live site (expect HTTP 200):
+5. Confirm the live site (expect HTTP 200), and that the published version
+   matches the repo's latest release (the shared workflow stamps it; if the
+   repo has no releases yet the committed placeholder is expected):
    ```bash
    repo=$(gh repo view --json name -q .name)
    curl -sS -o /dev/null -w "%{http_code}\n" "https://hmcts.github.io/$repo/"
    curl -sS -o /dev/null -w "%{http_code}\n" "https://hmcts.github.io/$repo/openapi-spec.yml"
+   curl -sS "https://hmcts.github.io/$repo/openapi-spec.yml" | yq '.info.version'
+   gh api "repos/hmcts/$repo/releases/latest" -q .tag_name   # should be v<that version>
    ```
 6. **Catalog listing** is automatic — the daily `discover-apis.yml` job in
    amp-catalog picks the repo up and opens a PR adding it to `docs/apis.json`.
