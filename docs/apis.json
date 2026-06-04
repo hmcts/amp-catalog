@@ -23,6 +23,18 @@
       "title": "CPP Case Aggregator API",
       "description": "Aggregates data from CPP downstream services and exposes shaped responses per domain.",
       "team": "APM"
+    },
+    {
+      "name": "api-cp-crime-schedulingandlisting-courtschedule",
+      "title": "Scheduling and Listing Court Schedule",
+      "description": "Scheduling and Listing API providing the court schedule.",
+      "team": "APM"
+    },
+    {
+      "name": "api-cp-refdata-courthearing-courthouses",
+      "title": "Refdata Court Hearing Court Houses",
+      "description": "Reference data API providing court houses associated with a court hearing.",
+      "team": "APM"
     }
   ]
 }
