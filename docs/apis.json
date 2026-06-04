@@ -1,40 +1,34 @@
 {
   "apis": [
     {
-      "name": "api-cp-crime-echo",
-      "title": "Echo API",
-      "description": "Simple example API for the API Marketplace.",
-      "team": "Case Admin"
-    },
-    {
       "name": "api-cp-crime-hearing-results-document-subscription",
       "title": "Crime Hearing Results Document Subscription",
       "description": "Subscription API for crime hearing-results documents.",
-      "team": "APM"
+      "team": "AMP"
     },
     {
       "name": "api-cp-crime-prosecution-case-details",
       "title": "Crime Prosecution Case Details",
       "description": "API for retrieving crime prosecution case details by URN.",
-      "team": "APM"
+      "team": "AMP"
     },
     {
       "name": "cpp-case-aggregator-poc",
       "title": "CPP Case Aggregator API",
       "description": "Aggregates data from CPP downstream services and exposes shaped responses per domain.",
-      "team": "APM"
+      "team": "AMP"
     },
     {
       "name": "api-cp-crime-schedulingandlisting-courtschedule",
       "title": "Scheduling and Listing Court Schedule",
       "description": "Scheduling and Listing API providing the court schedule.",
-      "team": "APM"
+      "team": "AMP"
     },
     {
       "name": "api-cp-refdata-courthearing-courthouses",
       "title": "Refdata Court Hearing Court Houses",
       "description": "Reference data API providing court houses associated with a court hearing.",
-      "team": "APM"
+      "team": "AMP"
     }
   ]
 }
