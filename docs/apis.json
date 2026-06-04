@@ -11,6 +11,12 @@
       "title": "Crime Hearing Results Document Subscription",
       "description": "Subscription API for crime hearing-results documents.",
       "team": "APM"
+    },
+    {
+      "name": "api-cp-crime-prosecution-case-details",
+      "title": "Crime Prosecution Case Details",
+      "description": "API for retrieving crime prosecution case details by URN.",
+      "team": "APM"
     }
   ]
 }
