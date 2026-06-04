@@ -43,6 +43,31 @@ jobs:
         uses: actions/checkout@v6
         with:
           ref: ${{ github.event.release.tag_name || github.ref }}
+          fetch-depth: 0 # tags are needed to resolve the release version below
+
+      # The committed spec carries a placeholder version (e.g. 0.0.0) — the
+      # real version is stamped at release time by hmcts/update-openapi-version
+      # into the published artefact, never back into git. Mirror that here so
+      # the docs site shows the released version and standard server URL.
+      - name: Stamp release version into spec
+        env:
+          OPENAPI_PATH: ${{ inputs.openapi_path }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          TAG="${RELEASE_TAG:-$(git describe --tags --abbrev=0 --match 'v*' 2>/dev/null || true)}"
+          if [ -z "$TAG" ]; then
+            echo "No v* release tag found; publishing spec version as committed."
+            exit 0
+          fi
+          VERSION="${TAG#v}"
+          API_NAME="${GITHUB_REPOSITORY#*/}"
+          yq -i "
+            .info.version = \"$VERSION\" |
+            .servers[0].url = \"https://$API_NAME.net/{version}\" |
+            .servers[0].variables.version.default = \"$VERSION\" |
+            .servers[0].variables.version.description = \"API version; matches the spec info.version\"
+          " "$OPENAPI_PATH"
+          echo "Stamped release version $VERSION (tag $TAG)"
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
