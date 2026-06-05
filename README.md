@@ -47,6 +47,34 @@ sites are retired.
 
 There is **one step** for an API team, plus the listing happens automatically.
 
+### Requirements (API repo)
+
+Before publishing, the API repo must meet all of these:
+
+- **Public repo** in the `hmcts` org — GitHub Pages on a public repo is
+  world-readable, so a private/internal repo cannot serve the docs site.
+- **External API (bucket 2b or 2c)** — safe to expose to the public internet.
+  Internal-only APIs (2a) are **not eligible** (see [Scope](#scope)).
+- **A valid OpenAPI spec** committed in the repo — HMCTS convention is
+  `src/main/resources/openapi/openapi-spec.yml`. It must parse and have an
+  `info.title` / `info.description` (used for the catalog entry).
+- **Standard `servers` block** — `https://<repo-name>.net/{version}` with a
+  `version` variable matching `info.version`. SwaggerHub virtserver URLs are no
+  longer available and must be replaced.
+- **The caller workflow** — `.github/workflows/publish-api-docs.yml` calling
+  the shared workflow, pinned to `@v1` (see below).
+- **GitHub Pages enabled** with `build_type: workflow` — one-time setup,
+  requires repo admin (the workflow's `GITHUB_TOKEN` cannot create the Pages
+  site in the hmcts org).
+- **Tag deployment policy** on the `github-pages` environment (`v*`, type
+  `tag`) — one-time setup, requires repo admin; without it release-triggered
+  deploys are rejected (see [Troubleshooting](#troubleshooting)).
+- **A published release** (`v*` tag) or a manual `workflow_dispatch` run to
+  trigger the publish.
+- **`CODEOWNERS` with an `@org/team` entry** *(optional)* — lets the daily
+  discovery job derive the owning team; otherwise it defaults to `TBD` until
+  overridden in `docs/apis.json`.
+
 ### Fast path — the Claude Code skill (recommended)
 
 If you use Claude Code, the `publish-api-to-catalog` skill does the whole thing
