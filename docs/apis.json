@@ -1,6 +1,12 @@
 {
   "apis": [
     {
+      "name": "api-cp-crime-court-list-publisher",
+      "title": "Crime Court List Publisher",
+      "description": "API for court list publishing service.",
+      "team": "AMP"
+    },
+    {
       "name": "api-cp-crime-hearing-results-document-subscription",
       "title": "Crime Hearing Results Document Subscription",
       "description": "Subscription API for crime hearing-results documents.",
