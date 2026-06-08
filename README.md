@@ -53,8 +53,8 @@ Before publishing, the API repo must meet all of these:
 
 - **Public repo** in the `hmcts` org — GitHub Pages on a public repo is
   world-readable, so a private/internal repo cannot serve the docs site.
-- **External API (bucket 2b or 2c)** — safe to expose to the public internet.
-  Internal-only APIs (2a) are **not eligible** (see [Scope](#scope)).
+- **External API** — safe to expose to the public internet.
+  Internal-only APIs are **not eligible** (see [Scope](#scope)).
 - **A valid OpenAPI spec** committed in the repo — HMCTS convention is
   `src/main/resources/openapi/openapi-spec.yml`. It must parse and have an
   `info.title` / `info.description` (used for the catalog entry).
