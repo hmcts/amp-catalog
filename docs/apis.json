@@ -4,13 +4,13 @@
       "name": "api-cp-crime-court-list-publisher",
       "title": "Crime Court List Publisher",
       "description": "Publishes court lists for downstream court services.",
-      "team": "AMP"
+      "team": "api-marketplace"
     },
     {
       "name": "api-cp-crime-hearing-results-document-subscription",
       "title": "Crime Hearing Results Document Subscription",
       "description": "Allows organisations to register for and receive notifications when crime hearing result documents become available.",
-      "team": "AMP"
+      "team": "api-marketplace"
     },
     {
       "name": "api-cp-crime-hearing-results-validator",
@@ -22,25 +22,25 @@
       "name": "api-cp-crime-prosecution-case-details",
       "title": "Crime Prosecution Case Details",
       "description": "Returns a summary of a criminal prosecution case for a given case reference number.",
-      "team": "AMP"
+      "team": "api-marketplace"
     },
     {
       "name": "api-cp-crime-schedulingandlisting-courtschedule",
       "title": "Scheduling and Listing Court Schedule",
       "description": "Returns the court hearing schedule for a given case, showing when and where hearings are listed.",
-      "team": "AMP"
+      "team": "api-marketplace"
     },
     {
       "name": "api-cp-refdata-courthearing-courthouses",
       "title": "Refdata Court Hearing Courthouses",
       "description": "Provides information about court buildings and the rooms within them.",
-      "team": "AMP"
+      "team": "api-marketplace"
     },
     {
       "name": "cpp-case-aggregator-poc",
       "title": "CPP Case Aggregator",
       "description": "Aggregates data from CPP downstream services and exposes shaped responses per domain.",
-      "team": "AMP"
+      "team": "api-marketplace"
     }
   ]
 }
