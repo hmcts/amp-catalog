@@ -1,0 +1,170 @@
+name: Publish OpenAPI Spec to APIHub
+
+# Central, reusable workflow for publishing an API's released spec to
+# SwaggerHub / APIHub.
+#
+# An API repo publishes by adding ONE small caller workflow:
+#
+#   jobs:
+#     swaggerhub:
+#       uses: hmcts/amp-catalog/.github/workflows/publish-openapi-spec.yml@v1
+#       with:
+#         openapi_path: src/main/resources/openapi/openapi-spec.yml
+#         apihub_owner: ${{ vars.APIHUB_ORGANISATION }}
+#       secrets:
+#         SWAGGERHUB_API_KEY: ${{ secrets.APIHUB_API_KEY }}
+#
+# Release-only: this always publishes the PUBLIC / released version. Unlike the
+# old per-repo workflow it is NOT artefact-coupled — it checks out the caller at
+# the released tag and stamps the version itself (mirroring publish-swagger-ui.yml),
+# so SwaggerHub publishing is decoupled from the build pipeline.
+on:
+  workflow_call:
+    inputs:
+      openapi_path:
+        description: "Path to the OpenAPI spec file in the calling repo"
+        required: true
+        type: string
+      apihub_owner:
+        description: "SwaggerHub / APIHub organisation that owns the API"
+        required: true
+        type: string
+      api_name:
+        description: "API name on SwaggerHub (defaults to the caller repo name)"
+        required: false
+        type: string
+        default: ""
+    secrets:
+      SWAGGERHUB_API_KEY:
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      # On a release, publish the spec as it was at the released tag;
+      # on manual runs, fall back to the latest v* tag.
+      - name: Checkout caller repo
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.release.tag_name || github.ref }}
+          fetch-depth: 0 # tags are needed to resolve the release version below
+
+      # The committed spec carries a placeholder version (e.g. 0.0.0) — the real
+      # version is the release tag. Stamp it in (same logic as publish-swagger-ui.yml)
+      # so the spec pushed to SwaggerHub carries the released version and server URL.
+      - name: Resolve and stamp release version
+        id: version
+        env:
+          OPENAPI_PATH: ${{ inputs.openapi_path }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          if [ ! -f "$OPENAPI_PATH" ]; then
+            echo "::error::OpenAPI spec not found at '$OPENAPI_PATH'"
+            exit 1
+          fi
+          TAG="${RELEASE_TAG:-$(git describe --tags --abbrev=0 --match 'v*' 2>/dev/null || true)}"
+          if [ -z "$TAG" ]; then
+            echo "::error::No v* release tag found; cannot determine the version to publish to SwaggerHub."
+            exit 1
+          fi
+          VERSION="${TAG#v}"
+          API_NAME="${GITHUB_REPOSITORY#*/}"
+          yq -i "
+            .info.version = \"$VERSION\" |
+            .servers[0].url = \"https://$API_NAME.net/{version}\" |
+            .servers[0].variables.version.default = \"$VERSION\" |
+            .servers[0].variables.version.description = \"API version; matches the spec info.version\"
+          " "$OPENAPI_PATH"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Stamped release version $VERSION (tag $TAG)"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+
+      - name: Install SwaggerHub CLI
+        run: npm install -g swaggerhub-cli
+
+      - name: Resolve API reference
+        id: ref
+        env:
+          APIHUB_OWNER: ${{ inputs.apihub_owner }}
+          API_NAME_INPUT: ${{ inputs.api_name }}
+          API_VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          API_NAME="${API_NAME_INPUT:-${GITHUB_REPOSITORY#*/}}"
+          echo "api_name=$API_NAME" >> "$GITHUB_OUTPUT"
+          echo "cli_api_ref=${APIHUB_OWNER}/${API_NAME}/${API_VERSION}" >> "$GITHUB_OUTPUT"
+
+      # https://github.com/SmartBear/swaggerhub-cli?tab=readme-ov-file#swaggerhub-apicreate
+      - name: Push RELEASE API definition into APIHub
+        env:
+          SWAGGERHUB_API_KEY: ${{ secrets.SWAGGERHUB_API_KEY }}
+          CLI_API_REF: ${{ steps.ref.outputs.cli_api_ref }}
+          OPENAPI_SPEC_FILE: ${{ inputs.openapi_path }}
+        run: |
+          echo "PUBLIC: Publishing the RELEASED API to SwaggerHub"
+          swaggerhub api:create "${CLI_API_REF}" --file "${OPENAPI_SPEC_FILE}" --published publish --visibility public
+
+      # https://github.com/SmartBear/swaggerhub-cli?tab=readme-ov-file#swaggerhub-apiget
+      - name: Check the API definition exists
+        env:
+          SWAGGERHUB_API_KEY: ${{ secrets.SWAGGERHUB_API_KEY }}
+          CLI_API_REF: ${{ steps.ref.outputs.cli_api_ref }}
+        run: |
+          set -o pipefail
+          if ! swaggerhub api:get "${CLI_API_REF}" 2>&1 | tee error.log; then
+            echo "❌ API definition was not found on APIHub"
+            echo "--- CLI Error Output ---"
+            cat error.log
+            exit 1
+          fi
+
+      # https://github.com/SmartBear/swaggerhub-cli?tab=readme-ov-file#swaggerhub-apivalidate
+      - name: Validate definition
+        env:
+          SWAGGERHUB_API_KEY: ${{ secrets.SWAGGERHUB_API_KEY }}
+          CLI_API_REF: ${{ steps.ref.outputs.cli_api_ref }}
+        run: |
+          set -o pipefail
+          if ! swaggerhub api:validate "${CLI_API_REF}" 2>&1 | tee error.log; then
+            echo "❌ OpenAPI definition failed validation"
+            echo "--- CLI Error Output ---"
+            cat error.log
+            exit 1
+          fi
+
+      # Clean up unpublished sha-snapshot versions (e.g. 1.0.0-be4c28d) left behind
+      # by earlier draft pushes, so only released versions remain on SwaggerHub.
+      - name: Delete snapshot versions
+        env:
+          SWAGGERHUB_API_KEY: ${{ secrets.SWAGGERHUB_API_KEY }}
+          APIHUB_OWNER: ${{ inputs.apihub_owner }}
+          API_NAME: ${{ steps.ref.outputs.api_name }}
+        run: |
+          set -o pipefail
+          echo "DELETING ${APIHUB_OWNER}/${API_NAME} snapshots"
+          swaggerhub api:get "${APIHUB_OWNER}/${API_NAME}/" | jq '.apis.[] | select( any(.properties[]; .type == "X-Published" and .value=="false") ) | .properties[] | select(.type == "X-Version")' > unpublished-versions.json
+          echo "unpublished-versions ... START"
+          cat unpublished-versions.json
+          echo "unpublished-versions ... END"
+          cat unpublished-versions.json | egrep "value.*\-[a-f0-9]{7}" | awk '{ print $2 }' | sed s/\"//g > delete-versions.json
+          echo "delete-versions ... START"
+          cat delete-versions.json
+          echo "delete-versions ... END"
+          cat delete-versions.json | while read DELETEVERSION
+          do
+              echo "deleting ${API_NAME} with version ${DELETEVERSION}"
+              swaggerhub api:delete "${APIHUB_OWNER}/${API_NAME}/${DELETEVERSION}" -f
+          done
+
+      # https://github.com/SmartBear/swaggerhub-cli?tab=readme-ov-file#swaggerhub-apisetdefault
+      - name: Set released version to the default API Definition
+        env:
+          SWAGGERHUB_API_KEY: ${{ secrets.SWAGGERHUB_API_KEY }}
+          CLI_API_REF: ${{ steps.ref.outputs.cli_api_ref }}
+        run: |
+          swaggerhub api:setdefault "${CLI_API_REF}"
