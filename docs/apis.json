@@ -41,6 +41,12 @@
       "title": "CPP Case Aggregator",
       "description": "Aggregates data from CPP downstream services and exposes shaped responses per domain.",
       "team": "api-marketplace"
+    },
+    {
+      "name": "api-cp-ai-rag",
+      "title": "RAG Service API",
+      "description": "API for RAG service for document ingestion and answer retrieval.",
+      "team": "api-marketplace"
     }
   ]
 }
