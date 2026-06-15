@@ -47,6 +47,12 @@
       "title": "CPP Case Aggregator",
       "description": "Aggregates data from CPP downstream services and exposes shaped responses per domain.",
       "team": "api-marketplace"
+    },
+    {
+      "name": "api-cp-crime-caseadmin-dcs-fulfilment",
+      "title": "Crime Case Administration Status Tracking",
+      "description": "Status tracking APIs for HMCTS Common Platform crime case administration (DCS fulfilment).",
+      "team": "api-marketplace"
     }
   ]
 }
