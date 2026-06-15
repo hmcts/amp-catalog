@@ -47,6 +47,12 @@
       "title": "RAG Service API",
       "description": "API for RAG service for document ingestion and answer retrieval.",
       "team": "api-marketplace"
+    },
+    {
+      "name": "api-cp-crime-caseadmin-dcs-fulfilment",
+      "title": "Crime Case Administration Status Tracking",
+      "description": "Status tracking APIs for HMCTS Common Platform crime case administration (DCS fulfilment).",
+      "team": "api-marketplace"
     }
   ]
 }
