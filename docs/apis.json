@@ -1,6 +1,12 @@
 {
   "apis": [
     {
+      "name": "api-cp-ai-rag",
+      "title": "RAG Service API",
+      "description": "API for RAG service for document ingestion and answer retrieval.",
+      "team": "api-marketplace"
+    },
+    {
       "name": "api-cp-crime-court-list-publisher",
       "title": "Crime Court List Publisher",
       "description": "Publishes court lists for downstream court services.",
