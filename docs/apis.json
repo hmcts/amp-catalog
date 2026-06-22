@@ -19,6 +19,12 @@
       "team": "api-marketplace"
     },
     {
+      "name": "api-cp-crime-hearing",
+      "title": "CP Crime Hearing API",
+      "description": "Returns hearing lifecycle data for a case: case timeline, defendant attendance at a hearing, and defendants and their offences.",
+      "team": "api-marketplace"
+    },
+    {
       "name": "api-cp-crime-hearing-results-document-subscription",
       "title": "Crime Hearing Results Document Subscription",
       "description": "Allows organisations to register for and receive notifications when crime hearing result documents become available.",
