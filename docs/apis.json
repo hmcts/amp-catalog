@@ -37,6 +37,12 @@
       "team": "api-marketplace"
     },
     {
+      "name": "api-cp-crime-prosecution-case",
+      "title": "CP Crime Prosecution Case API",
+      "description": "Returns the defendants on a prosecution case and their offences for a given case URN.",
+      "team": "api-marketplace"
+    },
+    {
       "name": "api-cp-crime-prosecution-case-details",
       "title": "Crime Prosecution Case Details",
       "description": "Returns a summary of a criminal prosecution case for a given case reference number.",
