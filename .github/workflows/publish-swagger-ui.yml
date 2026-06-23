@@ -40,7 +40,7 @@ jobs:
       # On a release, publish the spec as it was at the released tag;
       # on manual runs, publish the current ref.
       - name: Checkout caller repo
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ github.event.release.tag_name || github.ref }}
           fetch-depth: 0 # tags are needed to resolve the release version below
