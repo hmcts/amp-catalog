@@ -83,7 +83,15 @@ jobs:
             exit 1
           fi
           mkdir -p _site
-          cp "$OPENAPI_PATH" _site/openapi-spec.yml
+          SPEC_DIR=$(dirname "$OPENAPI_PATH")
+          SPEC_NAME=$(basename "$OPENAPI_PATH")
+          # Copy the spec's whole directory (schema/, examples/, etc.) so any
+          # local $refs to sibling files resolve as static files on Pages,
+          # then place the spec itself under the canonical name index.html expects.
+          cp -r "$SPEC_DIR"/. _site/
+          if [ "$SPEC_NAME" != "openapi-spec.yml" ]; then
+            mv "_site/$SPEC_NAME" _site/openapi-spec.yml
+          fi
           cat > _site/index.html <<'HTML'
           <!DOCTYPE html>
           <html lang="en">
