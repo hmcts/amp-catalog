@@ -74,8 +74,8 @@
     },
     {
       "name": "api-cp-crime-defendant-details",
-      "title": "Defendant ID look up",
-      "description": "Returns defendant details for a given caseUrn.",
+      "title": "Defendant Details",
+      "description": "Returns defendant details (name, date of birth) for defendants on a given case",
       "team": "api-marketplace"
     }
   ]
