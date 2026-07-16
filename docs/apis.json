@@ -61,6 +61,12 @@
       "team": "api-marketplace"
     },
     {
+      "name": "api-cp-crime-results-pcr",
+      "title": "CP Crime Prosecution Case Results (PCR) API",
+      "description": "Exposes prosecution case results (PCR) for criminal cases on the Common Platform (CP), shaped to align with the consuming HMPPS Remand and Sentencing (RaS) physical data model (Court Case / Court Appearance / Charge / Sentence / Period Length), so each response object maps directly onto an RaS table without HMPPS having to re-derive structure.\nGiven a case URN and a hearing, the API returns the results recorded for that prosecution case at the hearing \u2014 the result for each charge and each court application, including any sentence handed down. A defendant-scoped endpoint narrows the same view to a single defendant.\nEvery request identifies the specific results event to read via the required `eventId` query parameter, so a caller reads a stable snapshot of the results as they stood at that event rather than a mutable \"latest\".\nFields with no direct CP source, or with an open question still being tracked with the RaS team, are marked `nullable` and documented as such \u2014 they are not silently populated with placeholder values.",
+      "team": "api-marketplace"
+    },
+    {
       "name": "api-cp-crime-schedulingandlisting-courtschedule",
       "title": "Scheduling and Listing Court Schedule",
       "description": "Returns the court hearing schedule for a given case, showing when and where hearings are listed.",
