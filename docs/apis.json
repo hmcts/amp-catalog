@@ -61,6 +61,12 @@
       "team": "api-marketplace"
     },
     {
+      "name": "api-cp-crime-results-pcr",
+      "title": "CP Crime Prosecution Case Results (PCR) API",
+      "description": "Exposes Prison Court Register(PCR) details for criminal cases",
+      "team": "api-marketplace"
+    },
+    {
       "name": "api-cp-crime-schedulingandlisting-courtschedule",
       "title": "Scheduling and Listing Court Schedule",
       "description": "Returns the court hearing schedule for a given case, showing when and where hearings are listed.",
