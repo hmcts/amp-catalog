@@ -63,7 +63,7 @@
     {
       "name": "api-cp-crime-results-pcr",
       "title": "CP Crime Prosecution Case Results (PCR) API",
-      "description": "Exposes prosecution case results (PCR) for criminal cases on the Common Platform (CP), shaped to align with the consuming HMPPS Remand and Sentencing (RaS)",
+      "description": "Exposes Prison Court Register(PCR) details for criminal cases",
       "team": "api-marketplace"
     },
     {
