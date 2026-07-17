@@ -19,18 +19,6 @@
       "team": "api-marketplace"
     },
     {
-      "name": "api-cp-crime-hearing",
-      "title": "CP Crime Hearing API",
-      "description": "Returns hearing lifecycle data for a case: case timeline, defendant attendance at a hearing, and defendants and their offences.",
-      "team": "api-marketplace"
-    },
-    {
-      "name": "api-cp-crime-hearing-results",
-      "title": "CP Crime Hearing Results API",
-      "description": "Returns the results recorded at a hearing: offence results, court application results, and any sentence.",
-      "team": "api-marketplace"
-    },
-    {
       "name": "api-cp-crime-hearing-results-document-subscription",
       "title": "Crime Hearing Results Document Subscription",
       "description": "Allows organisations to register for and receive notifications when crime hearing result documents become available.",
@@ -40,12 +28,6 @@
       "name": "api-cp-crime-hearing-results-validator",
       "title": "Crime Hearing Results Validator",
       "description": "Validates draft hearing results against declarative, programmatic, and LLM-assisted rules.",
-      "team": "api-marketplace"
-    },
-    {
-      "name": "api-cp-crime-prosecution-case",
-      "title": "CP Crime Prosecution Case API",
-      "description": "Returns the defendants on a prosecution case and their offences for a given case URN.",
       "team": "api-marketplace"
     },
     {
