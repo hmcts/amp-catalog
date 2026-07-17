@@ -37,6 +37,12 @@
       "team": "api-marketplace"
     },
     {
+      "name": "api-cp-crime-results-pcr",
+      "title": "CP Crime Prosecution Case Results (PCR) API",
+      "description": "Exposes Prison Court Register(PCR) details for criminal cases",
+      "team": "api-marketplace"
+    },
+    {
       "name": "api-cp-crime-schedulingandlisting-courtschedule",
       "title": "Scheduling and Listing Court Schedule",
       "description": "Returns the court hearing schedule for a given case, showing when and where hearings are listed.",
@@ -52,12 +58,6 @@
       "name": "cpp-case-aggregator-poc",
       "title": "CPP Case Aggregator",
       "description": "Aggregates data from CPP downstream services and exposes shaped responses per domain.",
-      "team": "api-marketplace"
-    },
-    {
-      "name": "api-cp-crime-defendant-details",
-      "title": "Defendant ID look up",
-      "description": "Returns defendant details for a given caseUrn.",
       "team": "api-marketplace"
     }
   ]
