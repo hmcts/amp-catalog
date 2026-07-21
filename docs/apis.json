@@ -62,8 +62,8 @@
     },
     {
       "name": "api-cp-crime-results-pcr",
-      "title": "CP Crime Prosecution Case Results (PCR) API",
-      "description": "Exposes Prison Court Register(PCR) details for criminal cases",
+      "title": "Crime Case Prison Court Register API",
+      "description": "Returns the prosecution case results recorded at a hearing, per defendant \u2014 the result for each offence and each court application, including any sentence handed down, enriched with Reference Data classifications.\n\nThis API processes personal data under Article 6(1)(e) UK GDPR (public task) and the administration of justice provisions of Schedule 1 Part 2 DPA 2018. Special category data, where present, is processed under Article 9(2)(f) UK GDPR (legal claims) or Article 9(2)(g) (substantial public interest).",
       "team": "api-marketplace"
     },
     {
