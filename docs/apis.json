@@ -77,12 +77,6 @@
       "title": "Refdata Court Hearing Courthouses",
       "description": "Provides information about court buildings and the rooms within them.",
       "team": "api-marketplace"
-    },
-    {
-      "name": "cpp-case-aggregator-poc",
-      "title": "CPP Case Aggregator",
-      "description": "Aggregates data from CPP downstream services and exposes shaped responses per domain.",
-      "team": "api-marketplace"
     }
   ]
 }
